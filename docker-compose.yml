@@ -2,13 +2,23 @@ version: '3'
 services:
 
   trex:
-    image: hello-world  # trexcisco/trex
+    image: busybox
+    volumes:
+      - ./data:/data
 
   tippecanoe:
-    image: hello-world  # jskeates/tippecanoe
+    image: busybox
+    volumes:
+      - ./data:/data
 
   gdal:
-    image: hello-world  # geodata/gdal
+    image: geodata/gdal
+    volumes:
+      - ./data:/data
 
   tegola:
-    image: hello-world
+    image: busybox
+    volumes:
+      - ./data:/data
+
+
