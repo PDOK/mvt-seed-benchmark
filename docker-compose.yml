@@ -1,0 +1,14 @@
+version: '3'
+services:
+
+  trex:
+    image: hello-world  # trexcisco/trex
+
+  tippecanoe:
+    image: hello-world  # jskeates/tippecanoe
+
+  gdal:
+    image: hello-world  # geodata/gdal
+
+  tegola:
+    image: hello-world
