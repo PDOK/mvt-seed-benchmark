@@ -1,3 +1,4 @@
+#!/bin/bash
 function rp-download(){
   plan_id="$1"
   curl -L "https://www.ruimtelijkeplannen.nl/documents/$plan_id/$plan_id.gml" -o "$plan_id.gml"
