@@ -26,4 +26,3 @@ if [ ! -f "data/$plan_id-simplified.gml" ];then
   ogr2ogr -f GML "data/$plan_id-simplified-linear.gml" -nlt CONVERT_TO_LINEAR "data/$plan_id-simplified.gml"
   docker rm "$container_id"
 fi
-
