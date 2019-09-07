@@ -5,27 +5,36 @@ services:
     image: busybox
     volumes:
       - ./data:/data
-      - scripts:/scripts
+      - ./scripts:/scripts
+      - ./log:/log
 
   tippecanoe:
     image: klokantech/tippecanoe
     volumes:
       - ./data:/data
-      - scripts:/scripts
-    env_file:
-      - .env
+      - ./scripts:/scripts
+      - ./log:/log
+    entrypoint: /scripts/tippecanoe/tippecanoe.sh
+#    env_file:
+#      - .env
 
   gdal:
-    image: geodata/gdal
+    image: gdaldocker:latest
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.gdal
     volumes:
       - ./data:/data
-      - scripts:/scripts
+      - ./scripts:/scripts
+      - ./log:/log
+    working_dir: /scripts
 
   tegola:
     image: busybox
     volumes:
       - ./data:/data
-      - scripts:/scripts
+      - ./scripts:/scripts
+      - ./log:/log
 
 volumes:
   scripts:
