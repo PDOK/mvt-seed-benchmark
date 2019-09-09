@@ -14,15 +14,15 @@ services:
       - ./data:/data
       - ./scripts:/scripts
       - ./log:/log
-    entrypoint: /scripts/tippecanoe/tippecanoe.sh
+#    entrypoint: /scripts/tippecanoe/tippecanoe.sh
 #    env_file:
 #      - .env
 
   gdal:
-    image: gdaldocker:latest
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.gdal
+#    image: gdaldocker:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.gdal
     volumes:
       - ./data:/data
       - ./scripts:/scripts
