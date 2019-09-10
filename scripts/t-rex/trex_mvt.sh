@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 ITERATION_STEP=${1:-0}
+MIN_ZOOM=${2:-0}
+MAX_ZOOM=${3:-8}
 CURRENT_DIR="${0%/*}"
 . $CURRENT_DIR/../util.sh --source-only
 
@@ -59,11 +61,11 @@ function generateTiles(){
             trex generate \
             --config /scripts/t-rex/config.toml \
             --extent "$EXTENT" \
-            --maxzoom 8 --minzoom 0 \
+            --maxzoom $MAX_ZOOM --minzoom $MIN_ZOOM \
             --tileset "$PLAN_ID" \
             --overwrite true
 
-        log_filecount_and_dirsize $CURRENT_DIR/../.. "t-rex" $PLAN_ID 0 8
+        log_filecount_and_dirsize $CURRENT_DIR/../.. "t-rex" $PLAN_ID $MINZOOM $MAXZOOM
         rm "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
     fi
 }
