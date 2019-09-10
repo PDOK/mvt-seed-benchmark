@@ -3,7 +3,7 @@ viewer = true
 
 [[datasource]]
 name = "$PLANID"
-path = "/conf/data/$PLANID-simplified-linear.gml"
+path = "/data/simplified/$PLANID-simplified-linear.gml"
 
 [grid.user]
 width = 256
@@ -36,7 +36,7 @@ buffer_size = 0
 simplify = false
 
 [cache.file]
-base = "/var/cache/mvtcache"
+base = "/data/result/t-rex"
 
 [webserver]
 bind = "0.0.0.0"

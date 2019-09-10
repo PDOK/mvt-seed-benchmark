@@ -1,6 +1,6 @@
 #!/bin/bash
 . ./scripts/util.sh --source-only
-ITERATION_STEP=${$1:-0}
+ITERATION_STEP=${1:-0}
 
 ## PlanID, Log step, time spent, real time, user time, system time, cpu, Memory usage in bytes, inputs, outputs, max, swaps, major, minor
 # VERBOSE_LOG_FORMAT="${PLAN_ID},%E,%e,%U,%s,%P,%K,%I,%O,%D,%M,%W,%F,%R"

@@ -2,7 +2,7 @@ version: '3'
 services:
 
   trex:
-    image: busybox
+    image: sourcepole/t-rex
     volumes:
       - ./data:/data
       - ./scripts:/scripts
@@ -12,11 +12,7 @@ services:
     image: klokantech/tippecanoe
     volumes:
       - ./data:/data
-      - ./scripts:/scripts
       - ./log:/log
-#    entrypoint: /scripts/tippecanoe/tippecanoe.sh
-#    env_file:
-#      - .env
 
   gdal:
 #    image: gdaldocker:latest
