@@ -1,4 +1,6 @@
 #!/bin/bash
+. ./scripts/util.sh --source-only
+ITERATION_STEP=${$1:-0}
 
 ## PlanID, Log step, time spent, real time, user time, system time, cpu, Memory usage in bytes, inputs, outputs, max, swaps, major, minor
 # VERBOSE_LOG_FORMAT="${PLAN_ID},%E,%e,%U,%s,%P,%K,%I,%O,%D,%M,%W,%F,%R"
@@ -8,11 +10,11 @@ mkdir -p "data/result/tippecanoe"
 for FILENAME in data/simplified/*-simplified.gml
 do
   BASENAME=$(basename $FILENAME)
-  PLAN_ID=${BASENAME%-*}
-  # Log step, PlanID, time spent, cpu, Memory usage in bytes
-  LOG_FORMAT="${PLAN_ID},%E,%P,%M"
+  PLAN_ID=${BASENAME%-simplified.gml}
+  # Log step, PlanID, time spent, cpu, Memory usage in bytes, File inputs, File outputs
+  LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%I,%O"
 
-  STEP="Generate GeoJSON"
+  STEP="tippecanoe: Generate GeoJSON"
   echo "$STEP"
   /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o log/tippecanoe_benchmark.log --append \
   docker-compose run --rm -u "$UID:$UID" gdal \
@@ -29,7 +31,7 @@ do
 
   mkdir -p "$RESULT_DIR"
 
-  STEP="Run tippecanoe"
+  STEP="tippecanoe: Run tippecanoe"
   echo "$STEP"
   /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o log/tippecanoe_benchmark.log --append \
     docker-compose run --rm -u "$UID:$UID" tippecanoe \
@@ -42,6 +44,8 @@ do
         --detect-shared-borders \
         --buffer=5 \
         "/data/${PLAN_ID}.json"
+
+  log_filecount_and_dirsize "tippecanoe" $PLAN_ID 5 20
 
   rm "data/${PLAN_ID}.json"
   rm -rf "$RESULT_DIR"

@@ -1,4 +1,7 @@
 #!/bin/bash
+. ./scripts/util.sh --source-only
+ITERATION_STEP=${$1:-0}
+
 rm -rf "data/result/gdal"
 mkdir -p "data/result/gdal"
 for FILENAME in data/simplified/*-simplified.gml
@@ -7,11 +10,11 @@ do
   PLAN_ID=${BASENAME%-*}
 
   # Log step, PlanID, time spent, cpu, Memory usage in bytes
-  LOG_FORMAT="${PLAN_ID},%E,%P,%M,%K"
+  LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%K"
 
   RESULT_DIR="data/result/gdal/${PLAN_ID}"
 
-  STEP="Generate MVTs GDAL"
+  STEP="gdal: Generate MVTs GDAL"
   echo "$STEP"
   /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o log/gdal_benchmark.log --append \
     docker-compose run --rm -u "$UID:$UID" gdal \
@@ -28,6 +31,8 @@ do
     -dsco MINZOOM=0 \
     -dsco MAXZOOM=15 \
     -dsco TILING_SCHEME=EPSG:28992,-285401.92,903402.0,880803.84
+
+  log_filecount_and_dirsize "gdal" $PLAN_ID 0 15
 
   rm -rf "$RESULT_DIR"
 done
