@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 CURRENT_DIR="${0%/*}"
+LOG_DIR=$CURRENT_DIR/../log
+rm $LOG_DIR/*.log
+
 for i in {1..5}
 do
   UUID=$(uuidgen)
@@ -10,3 +13,7 @@ do
   $CURRENT_DIR/tippecanoe/tippecanoe_mvt.sh $RUN_IDS
   $CURRENT_DIR/gdal/ogr2ogr_mvt.sh $RUN_IDS
 done
+
+archive_dir=$LOG_DIR/$(date)
+mkdir -p $archive_dir 2> /dev/null
+mv $LOG_DIR/*.log "$archive_dir"

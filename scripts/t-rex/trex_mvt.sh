@@ -67,6 +67,7 @@ function generateTiles(){
 
         log_filecount_and_dirsize $CURRENT_DIR/../.. "t-rex" $PLAN_ID $MINZOOM $MAXZOOM
         rm "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
+        rm -rf "${DATA_DIR:?}/result/t-rex/${PLAN_ID:?}"
     fi
 }
 
