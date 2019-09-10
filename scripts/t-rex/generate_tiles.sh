@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 ITERATION_STEP=${1:-0}
-
-set -e
-
 CURRENT_DIR="${0%/*}"
-DATA_FOLDER_NAME="data"
-SOURCE_DATA_FOLDER="$CURRENT_DIR/../../$DATA_FOLDER_NAME"
+. $CURRENT_DIR/../util.sh --source-only
+
+DATA_DIR=$CURRENT_DIR/../../data
+LOG_DIR=$CURRENT_DIR/../../log
+set -e
 
 function getExtent(){
     plan_file=$1
@@ -24,7 +24,7 @@ function getExtent(){
 
 function init(){
     sed "s/\$PLANID/$PLAN_ID/g" $CURRENT_DIR/config.toml.template > $CURRENT_DIR/config.toml
-    getExtent "$SOURCE_DATA_FOLDER/simplified/$PLAN_ID-simplified.gml"
+    getExtent "$DATA_DIR/simplified/$PLAN_ID-simplified.gml"
 }
 
 function onFinish(){
@@ -36,35 +36,40 @@ function generateTiles(){
     FILENAME=$1
     BASENAME=$(basename $FILENAME)
     PLAN_ID=${BASENAME%-simplified.gml}
-    echo "BASENAME: $BASENAME"
-    echo "FILENAME: $FILENAME"
-    echo "PLAN_ID: $PLAN_ID"
-    # Log step, PlanID, time spent, cpu, Memory usage in bytes, File inputs, File outputs
-    LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%I,%O"
-    STEP="t-rex: preprocess gml"
-    echo "$STEP"
-    /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $CURRENT_DIR/../../log/trex_benchmark.log --append \
-        docker-compose run --rm -u "$UID:$UID"  gdal \
-        ogr2ogr -f GML "/data/simplified/$PLAN_ID-simplified-linear.gml" -nlt CONVERT_TO_LINEAR "/data/simplified/$PLAN_ID-simplified.gml"
-    
-    STEP="t-rex: generate tiles"
-    echo "$STEP"
-    echo "$PLAN_ID"
-    init "$PLAN_ID"
-    echo "EXTENT: $EXTENT"
-    /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $CURRENT_DIR/../../log/trex_benchmark.log --append \
-    docker-compose run --rm -u $UID:$UID \
-        trex generate \
-        --config /scripts/t-rex/config.toml \
-        --extent "$EXTENT" \
-        --maxzoom 8 --minzoom 0 \
-        --tileset "$PLAN_ID"
-    rm "$SOURCE_DATA_FOLDER/simplified/$PLAN_ID-simplified-linear.gml"
+
+    if [ ! -f  $CURRENT_DIR/../plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/../plannen_whitelist.txt; then
+        echo "BASENAME: $BASENAME"
+        echo "FILENAME: $FILENAME"
+        echo "PLAN_ID: $PLAN_ID"
+        # Log step, PlanID, time spent, cpu, Memory usage in bytes, File inputs, File outputs
+        LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%I,%O"
+        STEP="t-rex: preprocess gml"
+        echo "$STEP"
+        /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/trex_benchmark.log --append \
+            docker-compose run --rm -u "$UID:$UID"  gdal \
+            ogr2ogr -f GML "/data/simplified/$PLAN_ID-simplified-linear.gml" -nlt CONVERT_TO_LINEAR "/data/simplified/$PLAN_ID-simplified.gml"
+        
+        STEP="t-rex: generate tiles"
+        echo "$STEP"
+        echo "$PLAN_ID"
+        init "$PLAN_ID"
+        echo "EXTENT: $EXTENT"
+        /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/trex_benchmark.log --append \
+        docker-compose run --rm -u $UID:$UID \
+            trex generate \
+            --config /scripts/t-rex/config.toml \
+            --extent "$EXTENT" \
+            --maxzoom 8 --minzoom 0 \
+            --tileset "$PLAN_ID" \
+            --overwrite true
+
+        log_filecount_and_dirsize $CURRENT_DIR/../.. "t-rex" $PLAN_ID 0 8
+        rm "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
+    fi
 }
 
-for FILENAME in $SOURCE_DATA_FOLDER/simplified/*-simplified.gml
+for FILENAME in $DATA_DIR/simplified/*-simplified.gml
 do
-    echo $FILENAME
     generateTiles "$FILENAME"
 done
 
