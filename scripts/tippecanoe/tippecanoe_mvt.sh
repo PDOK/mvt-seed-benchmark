@@ -1,5 +1,7 @@
 #!/bin/bash
-ITERATION_STEP=${1:-0}
+ITERATION_STEP=${1:-"$(uuidgen),0"}
+MIN_ZOOM=${2:-5}
+MAX_ZOOM=${3:-13}
 CURRENT_DIR="${0%/*}"
 . $CURRENT_DIR/../util.sh --source-only
 
@@ -12,14 +14,16 @@ set -e
 rm -rf "$DATA_DIR/result/tippecanoe"
 mkdir -p "$DATA_DIR/result/tippecanoe"
 
-for FILENAME in $DATA_DIR/simplified/*-simplified.gml
-do
-
+function generateTiles() {
+  FILENAME=$1
   BASENAME=$(basename $FILENAME)
   PLAN_ID=${BASENAME%-simplified.gml}
 
   if [ ! -f  $CURRENT_DIR/../plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/../plannen_whitelist.txt; then
 
+    echo "BASENAME: $BASENAME"
+    echo "FILENAME: $FILENAME"
+    echo "PLAN_ID: $PLAN_ID"
     # Log step, PlanID, time spent, cpu, Memory usage in bytes, File inputs, File outputs
     LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%I,%O"
 
@@ -40,24 +44,30 @@ do
 
     mkdir -p "$RESULT_DIR"
 
-    STEP="tippecanoe: Run tippecanoe"
-    echo "$STEP"
-    /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/tippecanoe_benchmark.log --append \
-      docker-compose run --rm -u "$UID:$UID" tippecanoe \
-        tippecanoe \
-          --name="$PLAN_ID" \
-          --output-to-directory="/data/${RESULT_DIR}" \
-          --minimum-zoom=5 \
-          --maximum-zoom=20 \
-          --drop-densest-as-needed \
-          --detect-shared-borders \
-          --buffer=5 \
-          "/data/${PLAN_ID}.json"
+  STEP="tippecanoe: Run tippecanoe"
+  echo "$STEP"
+  /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o log/tippecanoe_benchmark.log --append \
+    docker-compose run --rm -u "$UID:$UID" tippecanoe \
+    tippecanoe \
+    --name="$PLAN_ID" \
+    --output-to-directory="/data/${RESULT_DIR}" \
+    --minimum-zoom=$MIN_ZOOM \
+    --maximum-zoom=$MAX_ZOOM \
+    --drop-densest-as-needed \
+    --detect-shared-borders \
+    --buffer=5 \
+    "/data/${PLAN_ID}.json"
 
-    log_filecount_and_dirsize $CURRENT_DIR/../.. "tippecanoe" $PLAN_ID 5 20
+    log_filecount_and_dirsize $CURRENT_DIR/../.. "tippecanoe" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
 
     # using ${var:?} to prevent expanding to "/", considering the rm -rf
     rm "${DATA_DIR:?}/${PLAN_ID:?}.json"
     rm -rf "${DATA_DIR:?}/${RESULT_DIR:?}"
   fi
+}
+
+for FILENAME in $DATA_DIR/simplified/*-simplified.gml
+do
+  echo "$FILENAME"
+  generateTiles "$FILENAME"
 done

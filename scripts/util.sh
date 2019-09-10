@@ -6,6 +6,7 @@ log_filecount_and_dirsize() {
   PLAN_ID=$3
   MIN_ZOOM=$4
   MAX_ZOOM=$5
+  RUN_IDS=$5
   LOG_ROW=""
   LOGFILE_NAME="$BASE_DIR/log/${BENCHMARK_TYPE}_counts.log"
 
@@ -15,5 +16,5 @@ log_filecount_and_dirsize() {
     LOG_ROW+=",$(du -s "$COUNT_DIR" | cut -f1),$(find "$COUNT_DIR" -type f | wc -l)"
   done
 
-  echo "$(date +%FT%T%Z)$LOG_ROW" >> $LOGFILE_NAME
+  echo "$RUN_IDS,$PLAN_ID,$(date +%FT%T%Z)$LOG_ROW" >> $LOGFILE_NAME
 }

@@ -1,5 +1,7 @@
 #!/bin/bash
-ITERATION_STEP=${1:-0}
+ITERATION_STEP=${1:-"$(uuidgen),0"}
+MIN_ZOOM=${2:-0}
+MAX_ZOOM=${3:-8}
 CURRENT_DIR="${0%/*}"
 . $CURRENT_DIR/../util.sh --source-only
 
@@ -7,13 +9,8 @@ DATA_DIR=$CURRENT_DIR/../../data
 LOG_DIR=$CURRENT_DIR/../../log
 set -e
 
-
-rm -rf "${DATA_DIR:?}/result/gdal"
-mkdir -p "${DATA_DIR:?}/result/gdal"
-
-
-for FILENAME in $DATA_DIR/simplified/*-simplified.gml
-do
+function generateTiles() {
+  FILENAME=$1
   BASENAME=$(basename $FILENAME)
   PLAN_ID=${BASENAME%-*}
 
@@ -37,11 +34,20 @@ do
       --config GML_EXPOSE_FID NO \
       --config GML_EXPOSE_GML_ID NO \
       --config GDAL_NUM_THREADS 0 \
-      -dsco MINZOOM=0 \
-      -dsco MAXZOOM=15 \
+      -dsco MINZOOM=$MIN_ZOOM \
+      -dsco MAXZOOM=$MAX_ZOOM \
       -dsco TILING_SCHEME=EPSG:28992,-285401.92,903402.0,880803.84
 
-    log_filecount_and_dirsize $CURRENT_DIR/../.. "gdal" $PLAN_ID 0 15
+    log_filecount_and_dirsize $CURRENT_DIR/../.. "gdal" $PLAN_ID $MIN_ZOOM $MAX_ZOOM
     rm -rf "${DATA_DIR:?}/$RESULT_DIR"
   fi
+}
+
+rm -rf "${DATA_DIR:?}/result/gdal"
+mkdir -p "${DATA_DIR:?}/result/gdal"
+
+for FILENAME in $DATA_DIR/simplified/*-simplified.gml
+do
+  echo "$FILENAME"
+  generateTiles "$FILENAME"
 done
