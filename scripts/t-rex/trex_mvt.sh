@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
-ITERATION_STEP=${1:-0}
-MIN_ZOOM=${2:-0}
-MAX_ZOOM=${3:-8}
-CURRENT_DIR="${0%/*}"
-. $CURRENT_DIR/../util.sh --source-only
-
-DATA_DIR=$CURRENT_DIR/../../data
-LOG_DIR=$CURRENT_DIR/../../log
-set -e
 
 function getExtent(){
     plan_file=$1
@@ -26,7 +17,7 @@ function getExtent(){
 
 function init(){
     replace_string=$(sed 's:/:\\/:g'  <<<"$DATA_DIR" )
-    sed "s/\$DATA_DIR/$replace_string/g;s/\$PLAN_ID/$PLAN_ID/g;"  "$CURRENT_DIR/config.toml.template"  > $CURRENT_DIR/config.toml    
+    sed "s/\$DATA_DIR/$replace_string/g;s/\$PLAN_ID/$PLAN_ID/g;"  "$CURRENT_DIR/t-rex/config.toml.template"  > "$CURRENT_DIR/t-rex/config.toml"
     getExtent "$DATA_DIR/simplified/$PLAN_ID-simplified.gml"
 
 }
@@ -38,10 +29,17 @@ function onFinish(){
 
 function generateTilesTrex(){
     FILENAME=$1
+    ITERATION_STEP=${2:-"$(uuidgen),0"}
+    BASE_DIR=$3
+    MIN_ZOOM=${4:-0}
+    MAX_ZOOM=${5:-8}
+    DATA_DIR=$BASE_DIR/../data
+    LOG_DIR=$BASE_DIR/../log
+
     BASENAME=$(basename $FILENAME)
     PLAN_ID=${BASENAME%-simplified.gml}
 
-    if [ ! -f  $CURRENT_DIR/../plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/../plannen_whitelist.txt; then
+    if [ ! -f  $CURRENT_DIR/plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/plannen_whitelist.txt; then
         echo "FILENAME: $FILENAME"
         # Log step, PlanID, time spent, cpu, Memory usage in Kbytes, File inputs, File outputs
         LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%I,%O"
@@ -58,20 +56,15 @@ function generateTilesTrex(){
         echo "EXTENT: $EXTENT"
         /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/trex_benchmark.log --append \
             t_rex generate \
-            --config $CURRENT_DIR/config.toml \
+            --config $CURRENT_DIR/t-rex/config.toml \
             --extent "$EXTENT" \
             --maxzoom $MAX_ZOOM --minzoom $MIN_ZOOM \
             --tileset "$PLAN_ID" \
             --overwrite true
 
-        log_filecount_and_dirsize $CURRENT_DIR/../.. "t-rex" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
+        log_filecount_and_dirsize $CURRENT_DIR/.. "t-rex" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
         rm "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
         rm -rf "${DATA_DIR:?}/result/t-rex/${PLAN_ID:?}"
     fi
 }
-
-for FILENAME in $DATA_DIR/simplified/*-simplified.gml
-do
-    generateTiles "$FILENAME"
-done
 

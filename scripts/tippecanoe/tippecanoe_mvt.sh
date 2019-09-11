@@ -1,13 +1,4 @@
 #!/bin/bash
-ITERATION_STEP=${1:-"$(uuidgen),0"}
-MIN_ZOOM=${2:-5}
-MAX_ZOOM=${3:-13}
-CURRENT_DIR="${0%/*}"
-. $CURRENT_DIR/../util.sh --source-only
-
-DATA_DIR=$CURRENT_DIR/../../data
-LOG_DIR=$CURRENT_DIR/../../log
-set -e
 
 ## PlanID, Log step, time spent, real time, user time, system time, cpu, Memory usage in bytes, inputs, outputs, max, swaps, major, minor
 # VERBOSE_LOG_FORMAT="${PLAN_ID},%E,%e,%U,%s,%P,%K,%I,%O,%D,%M,%W,%F,%R"
@@ -16,10 +7,17 @@ mkdir -p "$DATA_DIR/result/tippecanoe"
 
 function generateTilesTippecanoe() {
   FILENAME=$1
+  ITERATION_STEP=${2:-"$(uuidgen),0"}
+  BASE_DIR=$3
+  MIN_ZOOM=${4:-5}
+  MAX_ZOOM=${5:-13}
+  DATA_DIR=$BASE_DIR/../data
+  LOG_DIR=$BASE_DIR/../log
+
   BASENAME=$(basename $FILENAME)
   PLAN_ID=${BASENAME%-simplified.gml}
 
-  if [ ! -f  $CURRENT_DIR/../plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/../plannen_whitelist.txt; then
+  if [ ! -f  $CURRENT_DIR/plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/plannen_whitelist.txt; then
     echo "FILENAME: $FILENAME"
     # Log step, PlanID, time spent, cpu, Memory usage in bytes, File inputs, File outputs
     LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%I,%O"
@@ -53,15 +51,10 @@ function generateTilesTippecanoe() {
     --buffer=5 \
     "$DATA_DIR/${PLAN_ID}.json"
 
-    log_filecount_and_dirsize $CURRENT_DIR/../.. "tippecanoe" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
+    log_filecount_and_dirsize $CURRENT_DIR/.. "tippecanoe" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
 
     # using ${var:?} to prevent expanding to "/", considering the rm -rf
     rm "${DATA_DIR:?}/${PLAN_ID:?}.json"
     rm -rf "${DATA_DIR:?}/${RESULT_DIR:?}"
   fi
 }
-
-for FILENAME in $DATA_DIR/simplified/*-simplified.gml
-do
-  generateTiles "$FILENAME"
-done

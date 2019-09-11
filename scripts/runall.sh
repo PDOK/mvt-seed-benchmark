@@ -1,35 +1,32 @@
 #!/usr/bin/env bash
+set -e
 
 CURRENT_DIR="${0%/*}"
-LOG_DIR=$CURRENT_DIR/../log
-rm $LOG_DIR/*.log
+LOG_DIR=$CURRENT_DIR/log
+rm $LOG_DIR/*.log || true
 DATA_DIR=$CURRENT_DIR/../data
 
+# shellcheck source=src/lib.sh
 . $CURRENT_DIR/t-rex/trex_mvt.sh --source-only
+# shellcheck source=src/lib.sh
 . $CURRENT_DIR/gdal/ogr2ogr_mvt.sh --source-only
-. $CURRENT_DIR/tippecanoe/tippecanoe.sh --source-only
+# shellcheck source=src/lib.sh
+. $CURRENT_DIR/tippecanoe/tippecanoe_mvt.sh --source-only
+# shellcheck source=src/lib.sh
 . $CURRENT_DIR/util.sh --source-only
+echo "$DATA_DIR $CURRENT_DIR"
 
-for i in {1..10}
+for i in {1..3}
 do
   UUID=$(uuidgen)
-  RUN_IDS="$UUID,$i"
+  ITERATION_STEP="$UUID,$i"
   echo "### Running iteration $i with uuid $UUID ###"
-  $CURRENT_DIR/t-rex/trex_mvt.sh $RUN_IDS
-  $CURRENT_DIR/tippecanoe/tippecanoe_mvt.sh $RUN_IDS
-  $CURRENT_DIR/gdal/ogr2ogr_mvt.sh $RUN_IDS
-
+  echo "DATADIR in runall.sh: $DATA_DIR | CURRENT_DIR in runall.sh: $CURRENT_DIR"
   for FILENAME in $DATA_DIR/simplified/*-simplified.gml
   do
-    generateTilesOgr "$FILENAME" 
-    generateTilesTippecanoe "$FILENAME"
-    generateTilesTrex "$FILENAME"
-
-    FILENAME=$1
-    ITERATION_STEP=${2}
-    BASE_DIR=$3
-    MIN_ZOOM=${4:-0}
-    MAX_ZOOM=${5:-8}
+    generateTilesOgr "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
+    generateTilesTippecanoe "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
+    generateTilesTrex "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
   done
 done
 

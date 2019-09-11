@@ -1,9 +1,4 @@
 #!/bin/bash
-# ITERATION_STEP=${1:-"$(uuidgen),0"}
-# MIN_ZOOM=${2:-0}
-# MAX_ZOOM=${3:-8}
-# CURRENT_DIR="${0%/*}"
-
 
 function generateTilesOgr() {
   FILENAME=$1
@@ -14,10 +9,10 @@ function generateTilesOgr() {
   DATA_DIR=$BASE_DIR/../data
   LOG_DIR=$BASE_DIR/../log
   
-  BASENAME=$(basename $FILENAME)
+  BASENAME="$(basename $FILENAME)"
   PLAN_ID=${BASENAME%-*}
 
-  if [ ! -f  $CURRENT_DIR/../plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/../plannen_whitelist.txt; then
+  if [ ! -f  $CURRENT_DIR/plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/plannen_whitelist.txt; then
     echo "FILENAME: $FILENAME"
     # Log step, PlanID, time spent, cpu, Memory usage in bytes
     LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%K"
@@ -41,7 +36,7 @@ function generateTilesOgr() {
       -dsco MAXZOOM=$MAX_ZOOM \
       -dsco TILING_SCHEME=EPSG:28992,-285401.92,903402.0,880803.84
 
-    log_filecount_and_dirsize $CURRENT_DIR/../.. "gdal" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
+    log_filecount_and_dirsize $CURRENT_DIR/.. "gdal" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
     rm -rf "${DATA_DIR:?}/$RESULT_DIR"
   fi
 }
