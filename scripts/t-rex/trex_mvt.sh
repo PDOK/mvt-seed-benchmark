@@ -18,8 +18,9 @@ function getExtent(){
 function init(){
     replace_string=$(sed 's:/:\\/:g'  <<<"$DATA_DIR" )
     sed "s/\$DATA_DIR/$replace_string/g;s/\$PLAN_ID/$PLAN_ID/g;"  "$CURRENT_DIR/t-rex/config.toml.template"  > "$CURRENT_DIR/t-rex/config.toml"
-    getExtent "$DATA_DIR/simplified/$PLAN_ID-simplified.gml"
-
+    echo "init step 2"
+    echo "init step 3"
+    EXTENT="3.2,50.75,7.22,53.7"
 }
 
 function onFinish(){

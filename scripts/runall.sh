@@ -24,9 +24,9 @@ do
   echo "DATADIR in runall.sh: $DATA_DIR | CURRENT_DIR in runall.sh: $CURRENT_DIR"
   for FILENAME in $DATA_DIR/simplified/*.gpkg
   do
-#    generateTilesTippecanoe "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
+    generateTilesTippecanoe "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
     generateTilesTrex "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
-#    generateTilesOgr "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
+    generateTilesOgr "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
   done
 done
 
