@@ -25,8 +25,10 @@ function getExtent(){
 }
 
 function init(){
-    sed "s/\$PLANID/$PLAN_ID/g" $CURRENT_DIR/config.toml.template > $CURRENT_DIR/config.toml
+    replace_string=$(sed 's:/:\\/:g'  <<<"$DATA_DIR" )
+    sed "s/\$DATA_DIR/$replace_string/g;s/\$PLAN_ID/$PLAN_ID/g;"  "$CURRENT_DIR/config.toml.template"  > $CURRENT_DIR/config.toml    
     getExtent "$DATA_DIR/simplified/$PLAN_ID-simplified.gml"
+
 }
 
 function onFinish(){
@@ -34,22 +36,20 @@ function onFinish(){
     mv "tiles/$PLAN_ID/$PLAN_ID/metadata.json.tmp" "tiles/$PLAN_ID/$PLAN_ID/metadata.json"
 }
 
-function generateTiles(){
+function generateTilesTrex(){
     FILENAME=$1
     BASENAME=$(basename $FILENAME)
     PLAN_ID=${BASENAME%-simplified.gml}
 
     if [ ! -f  $CURRENT_DIR/../plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/../plannen_whitelist.txt; then
-        echo "BASENAME: $BASENAME"
         echo "FILENAME: $FILENAME"
-        echo "PLAN_ID: $PLAN_ID"
-        # Log step, PlanID, time spent, cpu, Memory usage in bytes, File inputs, File outputs
+        # Log step, PlanID, time spent, cpu, Memory usage in Kbytes, File inputs, File outputs
         LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%I,%O"
         STEP="t-rex: preprocess gml"
         echo "$STEP"
+
         /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/trex_benchmark.log --append \
-            docker-compose run --rm -u "$UID:$UID"  gdal \
-            ogr2ogr -f GML "/data/simplified/$PLAN_ID-simplified-linear.gml" -nlt CONVERT_TO_LINEAR "/data/simplified/$PLAN_ID-simplified.gml"
+            ogr2ogr -f GML "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml" -nlt CONVERT_TO_LINEAR "$DATA_DIR/simplified/$PLAN_ID-simplified.gml"
         
         STEP="t-rex: generate tiles"
         echo "$STEP"
@@ -57,9 +57,8 @@ function generateTiles(){
         init "$PLAN_ID"
         echo "EXTENT: $EXTENT"
         /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/trex_benchmark.log --append \
-        docker-compose run --rm -u $UID:$UID \
-            trex generate \
-            --config /scripts/t-rex/config.toml \
+            t_rex generate \
+            --config $CURRENT_DIR/config.toml \
             --extent "$EXTENT" \
             --maxzoom $MAX_ZOOM --minzoom $MIN_ZOOM \
             --tileset "$PLAN_ID" \

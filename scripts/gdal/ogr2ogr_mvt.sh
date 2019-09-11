@@ -1,20 +1,24 @@
 #!/bin/bash
-ITERATION_STEP=${1:-"$(uuidgen),0"}
-MIN_ZOOM=${2:-0}
-MAX_ZOOM=${3:-8}
-CURRENT_DIR="${0%/*}"
-. $CURRENT_DIR/../util.sh --source-only
+# ITERATION_STEP=${1:-"$(uuidgen),0"}
+# MIN_ZOOM=${2:-0}
+# MAX_ZOOM=${3:-8}
+# CURRENT_DIR="${0%/*}"
 
-DATA_DIR=$CURRENT_DIR/../../data
-LOG_DIR=$CURRENT_DIR/../../log
-set -e
 
-function generateTiles() {
+function generateTilesOgr() {
   FILENAME=$1
+  ITERATION_STEP=${2:-"$(uuidgen),0"}
+  BASE_DIR=$3
+  MIN_ZOOM=${4:-0}
+  MAX_ZOOM=${5:-8}
+  DATA_DIR=$BASE_DIR/../data
+  LOG_DIR=$BASE_DIR/../log
+  
   BASENAME=$(basename $FILENAME)
   PLAN_ID=${BASENAME%-*}
 
   if [ ! -f  $CURRENT_DIR/../plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/../plannen_whitelist.txt; then
+    echo "FILENAME: $FILENAME"
     # Log step, PlanID, time spent, cpu, Memory usage in bytes
     LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%K"
 
@@ -23,11 +27,10 @@ function generateTiles() {
     STEP="gdal: Generate MVTs GDAL"
     echo "$STEP"
     /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/gdal_benchmark.log --append \
-      docker-compose run --rm -u "$UID:$UID" gdal \
       ogr2ogr --debug ON -f MVT \
-      "/data/$RESULT_DIR" \
+      "$DATA_DIR/$RESULT_DIR" \
       -a_srs EPSG:28992 \
-      "/data/simplified/$PLAN_ID-simplified.gml" \
+      "$DATA_DIR/simplified/$PLAN_ID-simplified.gml" \
       -fieldTypeToString StringList,IntegerList,Date \
       --config GML_SKIP_RESOLVE_ELEMS HUGE \
       --config GML_SKIP_RESOLVE_ELEMS NONE \
@@ -38,7 +41,7 @@ function generateTiles() {
       -dsco MAXZOOM=$MAX_ZOOM \
       -dsco TILING_SCHEME=EPSG:28992,-285401.92,903402.0,880803.84
 
-    log_filecount_and_dirsize $CURRENT_DIR/../.. "gdal" $PLAN_ID $MIN_ZOOM $MAX_ZOOM
+    log_filecount_and_dirsize $CURRENT_DIR/../.. "gdal" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
     rm -rf "${DATA_DIR:?}/$RESULT_DIR"
   fi
 }
@@ -46,8 +49,7 @@ function generateTiles() {
 rm -rf "${DATA_DIR:?}/result/gdal"
 mkdir -p "${DATA_DIR:?}/result/gdal"
 
-for FILENAME in $DATA_DIR/simplified/*-simplified.gml
-do
-  echo "$FILENAME"
-  generateTiles "$FILENAME"
-done
+# for FILENAME in $DATA_DIR/simplified/*-simplified.gml
+# do
+#   generateTiles "$FILENAME"
+# done

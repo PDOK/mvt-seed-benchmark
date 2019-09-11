@@ -2,8 +2,8 @@
 viewer = true
 
 [[datasource]]
-name = "$PLANID"
-path = "/data/simplified/$PLANID-simplified-linear.gml"
+name = "$PLAN_ID"
+path = "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
 
 [grid.user]
 width = 256
@@ -15,11 +15,11 @@ resolutions = [3440.640,1720.320,860.160,430.080,215.040,107.520,53.760,26.880,1
 origin = "BottomLeft"
 
 [[tileset]]
-name = "$PLANID"
+name = "$PLAN_ID"
 
 [[tileset.layer]]
 name = "Plangebied"
-datasource = "$PLANID"
+datasource = "$PLAN_ID"
 table_name = "Plangebied"
 geometry_field = "geometryProperty"
 geometry_type = "MULTIPOLYGON"
@@ -28,7 +28,7 @@ simplify = false
 
 [[tileset.layer]]
 name = "Planobject"
-datasource = "$PLANID"
+datasource = "$PLAN_ID"
 table_name = "Planobject"
 geometry_field = "geometryProperty"
 geometry_type = "MULTIPOLYGON"
@@ -36,7 +36,7 @@ buffer_size = 0
 simplify = false
 
 [cache.file]
-base = "/data/result/t-rex"
+base = "$DATA_DIR/result/t-rex"
 
 [webserver]
 bind = "0.0.0.0"
