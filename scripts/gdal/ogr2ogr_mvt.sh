@@ -25,13 +25,7 @@ function generateTilesOgr() {
       ogr2ogr --debug ON -f MVT \
       "$DATA_DIR/$RESULT_DIR" \
       -a_srs EPSG:28992 \
-      "$DATA_DIR/simplified/$PLAN_ID-simplified.gml" \
-      -fieldTypeToString StringList,IntegerList,Date \
-      --config GML_SKIP_RESOLVE_ELEMS HUGE \
-      --config GML_SKIP_RESOLVE_ELEMS NONE \
-      --config GML_EXPOSE_FID NO \
-      --config GML_EXPOSE_GML_ID NO \
-      --config GDAL_NUM_THREADS 0 \
+      "$FILENAME" \
       -dsco MINZOOM=$MIN_ZOOM \
       -dsco MAXZOOM=$MAX_ZOOM \
       -dsco TILING_SCHEME=EPSG:28992,-285401.92,903402.0,880803.84

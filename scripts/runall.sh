@@ -16,17 +16,17 @@ DATA_DIR=$CURRENT_DIR/../data
 . $CURRENT_DIR/util.sh --source-only
 echo "$DATA_DIR $CURRENT_DIR"
 
-for i in {1..3}
+for i in {1..1}
 do
   UUID=$(uuidgen)
   ITERATION_STEP="$UUID,$i"
   echo "### Running iteration $i with uuid $UUID ###"
   echo "DATADIR in runall.sh: $DATA_DIR | CURRENT_DIR in runall.sh: $CURRENT_DIR"
-  for FILENAME in $DATA_DIR/simplified/*-simplified.gml
+  for FILENAME in $DATA_DIR/simplified/*.gpkg
   do
-    generateTilesOgr "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
-    generateTilesTippecanoe "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
+#    generateTilesTippecanoe "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
     generateTilesTrex "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
+#    generateTilesOgr "$FILENAME" "$ITERATION_STEP" "$CURRENT_DIR"
   done
 done
 

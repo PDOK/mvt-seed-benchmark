@@ -15,7 +15,8 @@ function generateTilesTippecanoe() {
   LOG_DIR=$BASE_DIR/../log
 
   BASENAME=$(basename $FILENAME)
-  PLAN_ID=${BASENAME%-simplified.gml}
+  PLAN_ID=${BASENAME%.gpkg}
+#  PLAN_ID=${BASENAME%-simplified.gml}
 
   if [ ! -f  $CURRENT_DIR/plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/plannen_whitelist.txt; then
     echo "FILENAME: $FILENAME"
@@ -29,10 +30,8 @@ function generateTilesTippecanoe() {
         -f GeoJSON \
         -s_srs EPSG:28992 \
         -t_srs EPSG:4326 \
-        -fieldTypeToString StringList,IntegerList,Date \
         "$DATA_DIR/$PLAN_ID.json" \
-        "$DATA_DIR/simplified/$PLAN_ID-simplified.gml" \
-        Planobject
+        "$FILENAME" \
 
     RESULT_DIR="result/tippecanoe/${PLAN_ID}"
 

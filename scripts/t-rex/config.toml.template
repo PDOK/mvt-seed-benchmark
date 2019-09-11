@@ -3,7 +3,7 @@ viewer = true
 
 [[datasource]]
 name = "$PLAN_ID"
-path = "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
+path = "$DATA_DIR/simplified/$PLAN_ID.gpkg"
 
 [grid.user]
 width = 256
@@ -18,19 +18,10 @@ origin = "BottomLeft"
 name = "$PLAN_ID"
 
 [[tileset.layer]]
-name = "Plangebied"
+name = "activiteiten_export"
 datasource = "$PLAN_ID"
-table_name = "Plangebied"
-geometry_field = "geometryProperty"
-geometry_type = "MULTIPOLYGON"
-buffer_size = 0
-simplify = false
-
-[[tileset.layer]]
-name = "Planobject"
-datasource = "$PLAN_ID"
-table_name = "Planobject"
-geometry_field = "geometryProperty"
+table_name = "activiteiten_export"
+geometry_field = "geometrie"
 geometry_type = "MULTIPOLYGON"
 buffer_size = 0
 simplify = false

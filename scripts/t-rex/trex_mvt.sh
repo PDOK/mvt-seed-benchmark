@@ -2,7 +2,7 @@
 
 function getExtent(){
     plan_file=$1
-    extent_string=$(ogrinfo -so "$plan_file" Plangebied | grep Extent)
+    extent_string=$(ogrinfo -so "$plan_file" "activiteiten_export" | grep Extent)
     regex="Extent:\s\(([0-9\.]+),\s([0-9\.]+)\)\s-\s\(([0-9\.]+),\s([0-9\.]+)\)"
     if [[ $extent_string =~ $regex ]]; then
         echo "extent_string: $extent_string"
@@ -37,18 +37,18 @@ function generateTilesTrex(){
     LOG_DIR=$BASE_DIR/../log
 
     BASENAME=$(basename $FILENAME)
-    PLAN_ID=${BASENAME%-simplified.gml}
+    PLAN_ID=${BASENAME%.gpkg}
 
     if [ ! -f  $CURRENT_DIR/plannen_whitelist.txt ] || grep -Fxq "$PLAN_ID" $CURRENT_DIR/plannen_whitelist.txt; then
         echo "FILENAME: $FILENAME"
         # Log step, PlanID, time spent, cpu, Memory usage in Kbytes, File inputs, File outputs
         LOG_FORMAT="${ITERATION_STEP},${PLAN_ID},%E,%P,%M,%I,%O"
-        STEP="t-rex: preprocess gml"
-        echo "$STEP"
+#        STEP="t-rex: preprocess gml"
+#        echo "$STEP"
 
-        /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/trex_benchmark.log --append \
-            ogr2ogr -f GML "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml" -nlt CONVERT_TO_LINEAR "$DATA_DIR/simplified/$PLAN_ID-simplified.gml"
-        
+#        /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/trex_benchmark.log --append \
+#            ogr2ogr -f GML "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml" -nlt CONVERT_TO_LINEAR "$DATA_DIR/simplified/$PLAN_ID-simplified.gml"
+
         STEP="t-rex: generate tiles"
         echo "$STEP"
         echo "$PLAN_ID"
@@ -63,8 +63,7 @@ function generateTilesTrex(){
             --overwrite true
 
         log_filecount_and_dirsize $CURRENT_DIR/.. "t-rex" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
-        rm "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
+#        rm "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
         rm -rf "${DATA_DIR:?}/result/t-rex/${PLAN_ID:?}"
     fi
 }
-
