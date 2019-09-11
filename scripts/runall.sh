@@ -4,7 +4,7 @@ CURRENT_DIR="${0%/*}"
 LOG_DIR=$CURRENT_DIR/../log
 rm $LOG_DIR/*.log
 
-for i in {1..5}
+for i in {1..10}
 do
   UUID=$(uuidgen)
   RUN_IDS="$UUID,$i"

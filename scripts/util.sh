@@ -6,7 +6,7 @@ log_filecount_and_dirsize() {
   PLAN_ID=$3
   MIN_ZOOM=$4
   MAX_ZOOM=$5
-  RUN_IDS=$5
+  RUN_IDS=$6
   LOG_ROW=""
   LOGFILE_NAME="$BASE_DIR/log/${BENCHMARK_TYPE}_counts.log"
   for ((ZOOM_LEVEL=MIN_ZOOM; ZOOM_LEVEL<MAX_ZOOM; ZOOM_LEVEL++))

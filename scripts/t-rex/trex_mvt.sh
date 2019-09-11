@@ -65,7 +65,7 @@ function generateTiles(){
             --tileset "$PLAN_ID" \
             --overwrite true
 
-        log_filecount_and_dirsize $CURRENT_DIR/../.. "t-rex" $PLAN_ID $MINZOOM $MAXZOOM
+        log_filecount_and_dirsize $CURRENT_DIR/../.. "t-rex" $PLAN_ID $MIN_ZOOM $MAX_ZOOM $ITERATION_STEP
         rm "$DATA_DIR/simplified/$PLAN_ID-simplified-linear.gml"
         rm -rf "${DATA_DIR:?}/result/t-rex/${PLAN_ID:?}"
     fi
