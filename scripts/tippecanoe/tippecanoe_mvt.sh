@@ -40,7 +40,7 @@ function generateTilesTippecanoe() {
 
   STEP="tippecanoe: Run tippecanoe"
   echo "$STEP"
-  /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o log/tippecanoe_benchmark.log --append \
+  /usr/bin/time --format="$(date +%FT%T%Z),$STEP,$LOG_FORMAT" -o $LOG_DIR/tippecanoe_benchmark.log --append \
     tippecanoe \
     --name="$PLAN_ID" \
     --output-to-directory="$DATA_DIR/${RESULT_DIR}" \
